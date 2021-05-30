@@ -1,0 +1,44 @@
+#!/bin/bash
+set -e
+
+# By SkylineIsBack
+
+out1="$(zenity --forms --title "WebApp Manager" --text "WebApp Manager" --add-entry="Name of the website:" --add-entry="URL of the website:")"
+name="$(echo "$out1" | cut -d '|' -f 1)"
+url="$(echo "$out1" | cut -d '|' -f 2)"
+if zenity --question --title "WebApp Manager" --text "Which icon would you like to use?" --ok-label="Use the default icon" --cancel-label="Select an icon" --no-wrap
+then
+    icon="emblem-web"
+else
+    icon="$(zenity --file-selection --title "Select an icon")"
+fi
+if zenity --question --title "WebApp Manager" --text "Which type of browser tab would you like to use?" --ok-label="Normal TAB" --cancel-label="Incognito TAB" --no-wrap
+then
+    finalurl="$url"
+else
+    finalurl="$url --incognito"
+fi
+if zenity --question --title "WebApp Manager" --text "Which browser do you have installed?" --ok-label="Google Chrome" --cancel-label="Chromium" --no-wrap
+then
+    echo "[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name="$name"
+Comment=A web application
+Exec=google-chrome --app="$finalurl"
+Icon=$icon
+Terminal=false" >> ~/.local/share/applications/$name.desktop
+    chmod +x ~/.local/share/applications/$name.desktop
+    zenity --info --title "Success" --text "Successfully made $name WebApp" --no-wrap
+else
+    echo "[Desktop Entry]
+Type=Application
+Encoding=UTF-8
+Name=$name
+Comment=A web application
+Exec=chromium --app="$finalurl"
+Icon=$icon
+Terminal=false" >> ~/.local/share/applications/$name.desktop
+    chmod +x ~/.local/share/applications/$name.desktop
+    zenity --info --title "Success" --text "Successfully made $name WebApp" --no-wrap
+fi
