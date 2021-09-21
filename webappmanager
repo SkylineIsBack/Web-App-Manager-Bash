@@ -3,42 +3,69 @@ set -e
 
 # By SkylineIsBack
 
-out1="$(zenity --forms --title "WebApp Manager" --text "WebApp Manager" --add-entry="Name of the website:" --add-entry="URL of the website:")"
+if [[ -f /usr/bin/google-chrome ]];
+then
+    browser1="Google Chrome"
+else
+    browser1="Google Chrome(Not installed)"
+fi
+if [[ -f /usr/bin/chromium ]];
+then
+    browser2="Chromium"
+else
+    browser2="Chromium(Not installed)"
+fi
+if [[ "$browser1" == "Google Chrome" ]];
+then
+    finalbrowser="google-chrome --app="
+elif [[ "browser2" == "Chromium" ]];
+then
+    finalbrowser="chromium --app="
+else
+    zenity --info --title "WebApp Manager" --text "Something is wrong." --no-wrap
+fi
+out1="$(zenity --forms --title "WebApp Manager" --text "WebApp Manager" --add-entry="Name of the website:" --add-entry="URL of the website:" --add-combo "Select a browser:" --combo-values "$browser1|$browser2" --add-combo "Select browser mode:" --combo-values "Normal|Incognito/Private" --add-combo "Select an icon:" --combo-values "Default|Select one")"
 name="$(echo "$out1" | cut -d '|' -f 1)"
 url="$(echo "$out1" | cut -d '|' -f 2)"
-if zenity --question --title "WebApp Manager" --text "Which icon would you like to use?" --ok-label="Use the default icon" --cancel-label="Select an icon" --no-wrap
+browser="$(echo "$out1" | cut -d '|' -f 3)"
+mode="$(echo "$out1" | cut -d '|' -f 4)"
+icon="$(echo "$out1" | cut -d '|' -f 5)"
+if [[ "$browser" == *"(Not installed)"* ]];
 then
-    icon="emblem-web"
-else
-    icon="$(zenity --file-selection --title "Select an icon")"
+    zenity --info --title "WebApp Manager" --text "Selected browser isn't installed. Please select another browser." --no-wrap
+    webappmanager
 fi
-if zenity --question --title "WebApp Manager" --text "Which type of browser tab would you like to use?" --ok-label="Normal TAB" --cancel-label="Incognito TAB" --no-wrap
+if [[ "$browser" == "Google Chrome" || "$browser" == "Chromium" ]];
 then
-    finalurl="$url"
+    if [[ "$mode" == "Normal" ]];
+    then
+        finalmode=""
+    elif [[ "$mode" == "Incognito/Private" ]];
+    then
+        finalmode="--incognito"
+    else
+        finalmode=""
+    fi
 else
-    finalurl="$url --incognito"
+    exit
 fi
-if zenity --question --title "WebApp Manager" --text "Which browser do you have installed?" --ok-label="Google Chrome" --cancel-label="Chromium" --no-wrap
+if [[ "$icon" == "Default" ]];
 then
-    echo "[Desktop Entry]
-Type=Application
-Encoding=UTF-8
-Name="$name"
-Comment=A web application
-Exec=google-chrome --app="$finalurl"
-Icon=$icon
-Terminal=false" >> ~/.local/share/applications/$name.desktop
-    chmod +x ~/.local/share/applications/$name.desktop
-    zenity --info --title "Success" --text "Successfully made $name WebApp" --no-wrap
+    finalicon="emblem-web"
+elif [[ "$icon" == "Select one" ]];
+then
+    finalicon="$(zenity --file-selection --title "Select an icon")"
 else
-    echo "[Desktop Entry]
+    finalicon="emblem-web"
+fi
+execline="$finalbrowser$url $finalmode"
+echo "[Desktop Entry]
 Type=Application
 Encoding=UTF-8
 Name=$name
-Comment=A web application
-Exec=chromium --app="$finalurl"
-Icon=$icon
+Comment=A Web App
+Exec=$execline
+Icon=$finalicon
 Terminal=false" >> ~/.local/share/applications/$name.desktop
-    chmod +x ~/.local/share/applications/$name.desktop
-    zenity --info --title "Success" --text "Successfully made $name WebApp" --no-wrap
-fi
+chmod +x ~/.local/share/applications/$name.desktop
+zenity --info --title "WebApp Manager" --text "Successfully created a Web App for $name" --no-wrap
