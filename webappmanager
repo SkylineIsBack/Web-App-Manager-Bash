@@ -15,21 +15,30 @@ then
 else
     browser2="Chromium(Not installed)"
 fi
-if [[ "$browser1" == "Google Chrome" ]];
+if [[ -f /usr/bin/microsoft-edge ]];
 then
-    finalbrowser="google-chrome --app="
-elif [[ "browser2" == "Chromium" ]];
-then
-    finalbrowser="chromium --app="
+    browser3="Microsoft Edge"
 else
-    zenity --info --title "WebApp Manager" --text "Something is wrong." --no-wrap
+    browser3="Microsoft Edge(Not installed)"
 fi
-out1="$(zenity --forms --title "WebApp Manager" --text "WebApp Manager" --add-entry="Name of the website:" --add-entry="URL of the website:" --add-combo "Select a browser:" --combo-values "$browser1|$browser2" --add-combo "Select browser mode:" --combo-values "Normal|Incognito/Private" --add-combo "Select an icon:" --combo-values "Default|Select one")"
+out1="$(zenity --forms --title "WebApp Manager" --text "WebApp Manager" --add-entry="Name of the website:" --add-entry="URL of the website:" --add-combo "Select a browser:" --combo-values "$browser1|$browser2|$browser3" --add-combo "Select browser mode:" --combo-values "Normal|Incognito/Private" --add-combo "Select an icon:" --combo-values "Default|Select one")"
 name="$(echo "$out1" | cut -d '|' -f 1)"
 url="$(echo "$out1" | cut -d '|' -f 2)"
 browser="$(echo "$out1" | cut -d '|' -f 3)"
 mode="$(echo "$out1" | cut -d '|' -f 4)"
 icon="$(echo "$out1" | cut -d '|' -f 5)"
+if [[ "$browser" == "Google Chrome" ]];
+then
+    finalbrowser="google-chrome --app="
+elif [[ "$browser" == "Chromium" ]];
+then
+    finalbrowser="chromium --app="
+elif [[ "$browser" == "Microsoft Edge" ]];
+then
+    finalbrowser="microsoft-edge --app="
+else
+    zenity --info --title "WebApp Manager" --text "Something is wrong." --no-wrap
+fi
 if [[ "$browser" == *"(Not installed)"* ]];
 then
     zenity --info --title "WebApp Manager" --text "Selected browser isn't installed. Please select another browser." --no-wrap
@@ -43,6 +52,17 @@ then
     elif [[ "$mode" == "Incognito/Private" ]];
     then
         finalmode="--incognito"
+    else
+        finalmode=""
+    fi
+elif [[ "$browser" == "Microsoft Edge" ]];
+then
+    if [[ "$mode" == "Normal" ]];
+    then
+        finalmode=""
+    elif [[ "$mode" == "Incognito/Private" ]];
+    then
+        finalmode="--inprivate"
     else
         finalmode=""
     fi
