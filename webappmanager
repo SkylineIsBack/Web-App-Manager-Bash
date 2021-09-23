@@ -21,7 +21,13 @@ then
 else
     browser3="Microsoft Edge(Not installed)"
 fi
-out1="$(zenity --forms --title "WebApp Manager" --text "WebApp Manager" --add-entry="Name of the website:" --add-entry="URL of the website:" --add-combo "Select a browser:" --combo-values "$browser1|$browser2|$browser3" --add-combo "Select browser mode:" --combo-values "Normal|Incognito/Private" --add-combo "Select an icon:" --combo-values "Default|Select one")"
+if [[ -f /usr/bin/brave-browser ]];
+then
+    browser4="Brave"
+else
+    browser4="Brave(Not installed)"
+fi
+out1="$(zenity --forms --title "WebApp Manager" --text "WebApp Manager" --add-entry="Name of the website:" --add-entry="URL of the website:" --add-combo "Select a browser:" --combo-values "$browser1|$browser2|$browser3|$browser4" --add-combo "Select browser mode:" --combo-values "Normal|Incognito/Private" --add-combo "Select an icon:" --combo-values "Default|Select one")"
 name="$(echo "$out1" | cut -d '|' -f 1)"
 url="$(echo "$out1" | cut -d '|' -f 2)"
 browser="$(echo "$out1" | cut -d '|' -f 3)"
@@ -36,6 +42,9 @@ then
 elif [[ "$browser" == "Microsoft Edge" ]];
 then
     finalbrowser="microsoft-edge --app="
+elif [[ "$browser" == "Brave" ]];
+then
+    finalbrowser="brave-browser --app="
 else
     zenity --info --title "WebApp Manager" --text "Something is wrong." --no-wrap
 fi
@@ -44,7 +53,7 @@ then
     zenity --info --title "WebApp Manager" --text "Selected browser isn't installed. Please select another browser." --no-wrap
     webappmanager
 fi
-if [[ "$browser" == "Google Chrome" || "$browser" == "Chromium" ]];
+if [[ "$browser" == "Google Chrome" || "$browser" == "Chromium" || "$browser" == "Brave" ]];
 then
     if [[ "$mode" == "Normal" ]];
     then
