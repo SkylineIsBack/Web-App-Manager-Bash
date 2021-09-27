@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e
+
+# By SkylineIsBack
+
+echo "Creating a webapp profile for firefox"
+cd $HOME/.mozilla/firefox/
+mkdir webapp-profile && cd webapp-profile
+echo 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);' >> user.js
+mkdir chrome && cd chrome
+echo '#nav-bar, #TabsToolbar, #tabbrowser-tabs {
+	visibility: collapse !important;
+}' >> userChrome.css
+echo "Successfully created a webapp profile for Firefox."

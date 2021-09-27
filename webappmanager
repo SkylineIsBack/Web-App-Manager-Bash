@@ -27,7 +27,13 @@ then
 else
     browser4="Brave(Not installed)"
 fi
-out1="$(zenity --forms --title "WebApp Manager" --text "WebApp Manager" --add-entry="Name of the website:" --add-entry="URL of the website:" --add-combo "Select a browser:" --combo-values "$browser1|$browser2|$browser3|$browser4" --add-combo "Select browser mode:" --combo-values "Normal|Incognito/Private" --add-combo "Select an icon:" --combo-values "Default|Select one")"
+if [[ -f /usr/bin/firefox ]];
+then
+    browser5="Firefox"
+else
+    browser5="Firefox(Not installed)"
+fi
+out1="$(zenity --forms --title "WebApp Manager" --text "WebApp Manager" --add-entry="Name of the website:" --add-entry="URL of the website:" --add-combo "Select a browser:" --combo-values "$browser1|$browser2|$browser3|$browser4|$browser5" --add-combo "Select browser mode:" --combo-values "Normal|Incognito/Private" --add-combo "Select an icon:" --combo-values "Default|Select one")"
 name="$(echo "$out1" | cut -d '|' -f 1)"
 url="$(echo "$out1" | cut -d '|' -f 2)"
 browser="$(echo "$out1" | cut -d '|' -f 3)"
@@ -35,16 +41,59 @@ mode="$(echo "$out1" | cut -d '|' -f 4)"
 icon="$(echo "$out1" | cut -d '|' -f 5)"
 if [[ "$browser" == "Google Chrome" ]];
 then
-    finalbrowser="google-chrome --app="
+    if [[ "$mode" == "Normal" ]];
+    then
+        execline="google-chrome --app=$url"
+    elif [[ "$mode" == "Incognito/Private" ]];
+    then
+        execline="google-chrome --app=$url --incognito"
+    else
+        execline="google-chrome --app=$url"
+    fi
 elif [[ "$browser" == "Chromium" ]];
 then
-    finalbrowser="chromium --app="
+    if [[ "$mode" == "Normal" ]];
+    then
+        execline="chromium --app=$url"
+    elif [[ "$mode" == "Incognito/Private" ]];
+    then
+        execline="chromium --app=$url --incognito"
+    else
+        execline="chromium --app=$url"
+    fi
 elif [[ "$browser" == "Microsoft Edge" ]];
 then
-    finalbrowser="microsoft-edge --app="
+    if [[ "$mode" == "Normal" ]];
+    then
+        execline="microsoft-edge --app=$url"
+    elif [[ "$mode" == "Incognito/Private" ]];
+    then
+        execline="microsoft-edge --app=$url --inprivate"
+    else
+        execline="microsoft-edge --app=$url"
+    fi
 elif [[ "$browser" == "Brave" ]];
 then
-    finalbrowser="brave-browser --app="
+    if [[ "$mode" == "Normal" ]];
+    then
+        execline="brave-browser --app=$url"
+    elif [[ "$mode" == "Incognito/Private" ]];
+    then
+        execline="brave-browser --app=$url --incognito"
+    else
+        execline="brave-browser --app=$url"
+    fi
+elif [[ "$browser" == "Firefox" ]];
+then
+    if [[ "$mode" == "Normal" ]];
+    then
+        execline="firefox $url --profile $HOME/.mozilla/firefox/webapp-profile"
+    elif [[ "$mode" == "Incognito/Private" ]];
+    then
+        execline="firefox --private-window $url --profile $HOME/.mozilla/firefox/webapp-profile"
+    else
+        execline="firefox $url --profile $HOME/.mozilla/firefox/webapp-profile"
+    fi
 else
     zenity --info --title "WebApp Manager" --text "Something is wrong." --no-wrap
 fi
@@ -52,31 +101,6 @@ if [[ "$browser" == *"(Not installed)"* ]];
 then
     zenity --info --title "WebApp Manager" --text "Selected browser isn't installed. Please select another browser." --no-wrap
     webappmanager
-fi
-if [[ "$browser" == "Google Chrome" || "$browser" == "Chromium" || "$browser" == "Brave" ]];
-then
-    if [[ "$mode" == "Normal" ]];
-    then
-        finalmode=""
-    elif [[ "$mode" == "Incognito/Private" ]];
-    then
-        finalmode="--incognito"
-    else
-        finalmode=""
-    fi
-elif [[ "$browser" == "Microsoft Edge" ]];
-then
-    if [[ "$mode" == "Normal" ]];
-    then
-        finalmode=""
-    elif [[ "$mode" == "Incognito/Private" ]];
-    then
-        finalmode="--inprivate"
-    else
-        finalmode=""
-    fi
-else
-    exit
 fi
 if [[ "$icon" == "Default" ]];
 then
@@ -87,7 +111,6 @@ then
 else
     finalicon="emblem-web"
 fi
-execline="$finalbrowser$url $finalmode"
 echo "[Desktop Entry]
 Type=Application
 Encoding=UTF-8
